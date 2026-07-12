@@ -1,6 +1,20 @@
 (function() {
     'use strict';
 
+    // DEBUG OVERLAY
+    var debugDiv = document.createElement('div');
+    debugDiv.id = 'debug';
+    debugDiv.style.cssText = 'position:fixed;top:40px;left:10px;right:10px;background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:12px;padding:10px;z-index:9999;max-height:200px;overflow:auto;white-space:pre-wrap;word-break:break-all;';
+    document.body.appendChild(debugDiv);
+
+    function log(msg) {
+        console.log(msg);
+        debugDiv.textContent += msg + '\n';
+        debugDiv.scrollTop = debugDiv.scrollHeight;
+    }
+
+    log('=== START ===');
+
     var container = document.getElementById('slidesContainer');
     var slides = document.querySelectorAll('.slide');
     var progressBar = document.getElementById('progressBar');
@@ -15,13 +29,10 @@
     var touchEndY = 0;
     var slideHeight = 0;
 
-    // Web Audio API variables
     var audioCtx = null;
     var audioBuffer = null;
     var currentSource = null;
     var isPlaying = false;
-    var startTime = 0;
-    var pauseTime = 0;
 
     var audioIndicator = document.createElement('div');
     audioIndicator.className = 'audio-indicator';
@@ -145,39 +156,50 @@
         }
     });
 
-    // ===== WEB AUDIO API =====
+    // ===== WEB AUDIO API WITH DEBUG =====
 
     function initAudioContext() {
-        if (audioCtx) return;
+        if (audioCtx) return true;
         var AudioContext = window.AudioContext || window.webkitAudioContext;
         if (!AudioContext) {
-            console.log('Web Audio API not supported');
-            return;
+            log('ERROR: Web Audio API not supported');
+            return false;
         }
         audioCtx = new AudioContext();
+        log('AudioContext created, state: ' + audioCtx.state);
+        return true;
     }
 
     function loadAudio() {
-        if (audioBuffer) return Promise.resolve(audioBuffer);
+        log('loadAudio called');
+        if (audioBuffer) {
+            log('Audio already loaded');
+            return Promise.resolve(audioBuffer);
+        }
         
+        log('Fetching audio/song.mp3...');
         return fetch('audio/song.mp3')
             .then(function(response) {
+                log('Fetch response: ' + response.status);
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 return response.arrayBuffer();
             })
             .then(function(arrayBuffer) {
+                log('ArrayBuffer received: ' + arrayBuffer.byteLength + ' bytes');
                 if (!audioCtx) initAudioContext();
+                log('Decoding audio...');
                 return audioCtx.decodeAudioData(arrayBuffer);
             })
             .then(function(decodedBuffer) {
                 audioBuffer = decodedBuffer;
-                console.log('Audio loaded, duration:', audioBuffer.duration);
+                log('Audio decoded! Duration: ' + audioBuffer.duration + 's');
+                if (audioError) audioError.style.display = 'none';
                 return audioBuffer;
             })
             .catch(function(error) {
-                console.log('Audio load failed:', error.message);
+                log('ERROR: ' + error.message);
                 if (audioError) {
-                    audioError.textContent = 'Не удалось загрузить аудио: ' + error.message;
+                    audioError.textContent = 'Ошибка: ' + error.message;
                     audioError.style.display = 'block';
                 }
                 throw error;
@@ -185,52 +207,36 @@
     }
 
     function playAudio() {
-        if (!audioCtx) initAudioContext();
+        log('playAudio called');
+        if (!audioCtx) {
+            log('ERROR: No AudioContext');
+            return;
+        }
         
-        // Resume context if suspended (iOS requirement)
         if (audioCtx.state === 'suspended') {
+            log('Resuming AudioContext...');
             audioCtx.resume();
         }
 
-        // Stop current playback
         if (currentSource) {
             try { currentSource.stop(); } catch(e) {}
             currentSource = null;
         }
 
-        // Create new source
         currentSource = audioCtx.createBufferSource();
         currentSource.buffer = audioBuffer;
         currentSource.loop = true;
         currentSource.connect(audioCtx.destination);
         
-        startTime = audioCtx.currentTime - pauseTime;
-        currentSource.start(0, pauseTime);
+        log('Starting playback...');
+        currentSource.start(0);
         isPlaying = true;
         audioIndicator.classList.add('active');
-        
-        currentSource.onended = function() {
-            if (isPlaying) {
-                pauseTime = 0;
-                playAudio();
-            }
-        };
-    }
-
-    function stopAudio() {
-        if (currentSource) {
-            try { currentSource.stop(); } catch(e) {}
-            currentSource = null;
-        }
-        if (audioCtx) {
-            pauseTime = audioCtx.currentTime - startTime;
-        }
-        isPlaying = false;
-        audioIndicator.classList.remove('active');
+        log('PLAYING!');
     }
 
     function restartAudio() {
-        pauseTime = 0;
+        log('restartAudio called');
         if (audioBuffer) {
             playAudio();
         } else {
@@ -240,11 +246,12 @@
         }
     }
 
-    // Preload audio on first interaction
+    // Preload on first interaction
     var preloaded = false;
     function preloadOnce() {
         if (preloaded) return;
         preloaded = true;
+        log('First touch - preloading audio');
         initAudioContext();
         loadAudio().catch(function() {});
     }
@@ -255,15 +262,20 @@
     playBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         e.preventDefault();
+        log('=== PLAY BUTTON CLICKED ===');
 
         if (audioBuffer) {
+            log('Buffer ready, playing now');
             playAudio();
             nextSlide();
         } else {
+            log('Buffer not ready, loading first...');
             loadAudio().then(function() {
+                log('Loaded, now playing');
                 playAudio();
                 nextSlide();
-            }).catch(function() {
+            }).catch(function(err) {
+                log('Load failed, going to next slide anyway');
                 nextSlide();
             });
         }
@@ -273,7 +285,7 @@
     inlineReplayBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         e.preventDefault();
-
+        log('=== REPLAY CLICKED ===');
         restartAudio();
 
         hideAllLines();
@@ -303,6 +315,7 @@
         firstSlide.querySelector('.slide-content').classList.add('visible');
         showLines(firstSlide, 600);
         updateProgress();
+        log('Init done');
     }
 
     if (document.readyState === 'loading') {

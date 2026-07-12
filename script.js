@@ -160,7 +160,6 @@
             return Promise.resolve(audioBuffer);
         }
         
-        // FIXED: file is in root, not in audio/ folder
         return fetch('./song.mp3')
             .then(function(response) {
                 if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -279,14 +278,4 @@
     function init() {
         updateSlideHeight();
         var firstSlide = slides[0];
-        firstSlide.querySelector('.slide-content').classList.add('visible');
-        showLines(firstSlide, 600);
-        updateProgress();
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-})();
+        firstSlide.querySelector('.

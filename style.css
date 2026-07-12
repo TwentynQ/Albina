@@ -1,300 +1,338 @@
-/* Reset */
-*, *::before, *::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
+(function() {
+    'use strict';
 
-html, body {
-    height: 100%;
-    overflow: hidden;
-    background: #000000;
-    font-family: 'Caveat', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
+    // ===== AUDIO ENGINE =====
+    var AUDIO_URL = 'audio/song.mp3';
+    var SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
 
-.viewport {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #000000;
-}
+    var audio = null;
+    var audioUnlocked = false;
+    var musicPlaying = false;
+    var blobUrl = null;
 
-.slides-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.85s cubic-bezier(0.32, 0.72, 0, 1);
-    will-change: transform;
-}
-
-.slide {
-    width: 100%;
-    min-height: 100%;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 32px;
-    position: relative;
-}
-
-.slide-content {
-    max-width: 340px;
-    text-align: left;
-    opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.slide-content.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.line {
-    font-size: 28px;
-    font-weight: 400;
-    line-height: 1.45;
-    color: #E8E8ED;
-    letter-spacing: 0.01em;
-    margin-bottom: 2px;
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
-}
-
-.line.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.line.accent {
-    font-size: 80px;
-    font-weight: 300;
-    line-height: 1.0;
-    color: #F5F5F7;
-    letter-spacing: -0.02em;
-    margin: 6px 0 10px;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 1s ease-out 0.3s, transform 1s ease-out 0.3s;
-}
-
-.line.accent.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.inline-btn {
-    display: inline-block;
-    padding: 4px 18px;
-    margin: 8px 0 6px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 100px;
-    color: #F5F5F7;
-    font-family: 'Caveat', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 26px;
-    font-weight: 500;
-    line-height: 1.4;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    outline: none;
-    -webkit-appearance: none;
-    appearance: none;
-    -webkit-tap-highlight-color: rgba(255,255,255,0.1);
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 0.7s ease-out, transform 0.7s ease-out,
-                background 0.3s ease, border-color 0.3s ease;
-}
-
-.inline-btn.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.inline-btn:active {
-    transform: scale(0.96);
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.22);
-}
-
-.line.quote {
-    font-style: italic;
-    color: #A1A1A6;
-    margin-top: 10px;
-    font-size: 26px;
-    line-height: 1.45;
-}
-
-.line.final {
-    margin-top: 20px;
-    font-weight: 500;
-    color: #F5F5F7;
-    font-size: 32px;
-}
-
-.play-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 30px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 100px;
-    color: #F5F5F7;
-    font-family: 'Caveat', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 24px;
-    font-weight: 400;
-    letter-spacing: 0.01em;
-    cursor: pointer;
-    outline: none;
-    transition: background 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
-    -webkit-appearance: none;
-    appearance: none;
-    opacity: 0;
-    transform: translateY(16px);
-}
-
-.play-btn.visible {
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 0.7s ease-out, transform 0.7s ease-out,
-                background 0.3s ease, border-color 0.3s ease;
-}
-
-.play-btn:active {
-    transform: scale(0.96);
-    background: rgba(255, 255, 255, 0.12);
-}
-
-.play-icon {
-    font-size: 14px;
-    opacity: 0.7;
-}
-
-.progress-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 0%;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.15);
-    transition: width 0.5s cubic-bezier(0.32, 0.72, 0, 1);
-    z-index: 100;
-}
-
-.scroll-hint {
-    position: fixed;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 24px;
-    height: 36px;
-    border: 1.5px solid rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
-    opacity: 0;
-    animation: fadeInHint 2s ease 3s forwards, pulseHint 2s ease-in-out 5s infinite;
-    z-index: 50;
-}
-
-.scroll-hint::after {
-    content: '';
-    position: absolute;
-    top: 6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 3px;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-    animation: scrollDot 2s ease-in-out 5s infinite;
-}
-
-@keyframes fadeInHint {
-    to { opacity: 1; }
-}
-
-@keyframes pulseHint {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
-}
-
-@keyframes scrollDot {
-    0%, 100% { top: 6px; opacity: 0.6; }
-    50% { top: 18px; opacity: 0.2; }
-}
-
-.audio-indicator {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 2px;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    z-index: 100;
-}
-
-.audio-indicator.active {
-    opacity: 0.4;
-}
-
-.audio-indicator span {
-    display: block;
-    width: 2px;
-    background: #fff;
-    border-radius: 1px;
-    animation: audioWave 1.2s ease-in-out infinite;
-}
-
-.audio-indicator span:nth-child(1) { height: 6px; animation-delay: 0s; }
-.audio-indicator span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
-.audio-indicator span:nth-child(3) { height: 8px; animation-delay: 0.3s; }
-.audio-indicator span:nth-child(4) { height: 14px; animation-delay: 0.1s; }
-
-@keyframes audioWave {
-    0%, 100% { transform: scaleY(0.5); }
-    50% { transform: scaleY(1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .slides-container {
-        transition: none;
+    // Preload audio as blob (bypasses iOS HTTP restrictions)
+    function preloadAudio() {
+        fetch(AUDIO_URL)
+            .then(function(response) {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.blob();
+            })
+            .then(function(blob) {
+                blobUrl = URL.createObjectURL(blob);
+                console.log('Audio preloaded as blob');
+            })
+            .catch(function(err) {
+                console.log('Preload failed, will use direct URL:', err);
+            });
     }
-    .slide-content,
-    .line,
-    .line.accent,
-    .play-btn,
-    .inline-btn {
-        transition: none;
-    }
-}
 
-@media (orientation: landscape) and (max-height: 500px) {
-    .slide {
-        padding: 0 48px;
+    function createAudio() {
+        if (audio) return;
+        audio = new Audio();
+        audio.loop = true;
+        audio.preload = 'metadata';
+        audio.setAttribute('playsinline', '');
+        audio.setAttribute('webkit-playsinline', '');
+        console.log('Audio object created');
     }
-    .line {
-        font-size: 24px;
+
+    function unlockAudioElement() {
+        if (audioUnlocked || !audio) {
+            console.log('Unlock skipped: unlocked=' + audioUnlocked + ', audio=' + !!audio);
+            return;
+        }
+
+        audio.src = SILENT_WAV;
+        audio.muted = true;
+        audio.volume = 0;
+
+        console.log('Trying silent unlock...');
+        var playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(function() {
+                console.log('Silent unlock SUCCESS');
+                audioUnlocked = true;
+                audio.pause();
+                audio.currentTime = 0;
+                audio.muted = false;
+                audio.volume = 1;
+            }).catch(function(err) {
+                console.log('Silent unlock FAILED:', err.name, err.message);
+            });
+        } else {
+            console.log('No promise (old browser), assuming unlocked');
+            audioUnlocked = true;
+        }
     }
-    .line.accent {
-        font-size: 56px;
+
+    function playSong() {
+        console.log('playSong called, unlocked=' + audioUnlocked);
+        if (!audio) createAudio();
+
+        var srcToUse = blobUrl || AUDIO_URL;
+        console.log('Using src:', srcToUse.substring(0, 50));
+
+        if (!audioUnlocked) {
+            console.log('Not unlocked, doing silent unlock first');
+            unlockAudioElement();
+            setTimeout(function() {
+                console.log('Setting real src after unlock');
+                audio.src = srcToUse;
+                audio.load();
+                var p = audio.play();
+                if (p !== undefined) {
+                    p.then(function() {
+                        console.log('Real play SUCCESS after unlock');
+                        musicPlaying = true;
+                        updateAudioIndicator();
+                    }).catch(function(err) {
+                        console.log('Real play FAILED after unlock:', err.name);
+                    });
+                }
+            }, 150);
+            return;
+        }
+
+        console.log('Already unlocked, playing directly');
+        audio.src = srcToUse;
+        audio.load();
+        var promise = audio.play();
+        if (promise !== undefined) {
+            promise.then(function() {
+                console.log('Direct play SUCCESS');
+                musicPlaying = true;
+                updateAudioIndicator();
+            }).catch(function(err) {
+                console.log('Direct play FAILED:', err.name);
+            });
+        } else {
+            musicPlaying = true;
+            updateAudioIndicator();
+        }
     }
-    .inline-btn {
-        font-size: 22px;
+
+    function restartSong() {
+        console.log('restartSong called');
+        if (audio) {
+            audio.currentTime = 0;
+            var p = audio.play();
+            if (p !== undefined) {
+                p.then(function() {
+                    musicPlaying = true;
+                    updateAudioIndicator();
+                }).catch(function() {});
+            } else {
+                musicPlaying = true;
+                updateAudioIndicator();
+            }
+        }
     }
-}
+
+    // ===== SLIDES ENGINE =====
+    var container = document.getElementById('slidesContainer');
+    var slides = document.querySelectorAll('.slide');
+    var progressBar = document.getElementById('progressBar');
+    var playBtn = document.getElementById('playBtn');
+    var inlineReplayBtn = document.getElementById('inlineReplayBtn');
+
+    var totalSlides = slides.length;
+    var currentSlide = 0;
+    var isAnimating = false;
+    var touchStartY = 0;
+    var touchEndY = 0;
+    var slideHeight = 0;
+
+    var audioIndicator = document.createElement('div');
+    audioIndicator.className = 'audio-indicator';
+    audioIndicator.innerHTML = '<span></span><span></span><span></span><span></span>';
+    document.querySelector('.viewport').appendChild(audioIndicator);
+
+    function updateAudioIndicator() {
+        if (musicPlaying) {
+            audioIndicator.classList.add('active');
+        } else {
+            audioIndicator.classList.remove('active');
+        }
+    }
+
+    var scrollHint = document.createElement('div');
+    scrollHint.className = 'scroll-hint';
+    document.querySelector('.viewport').appendChild(scrollHint);
+
+    function updateSlideHeight() {
+        slideHeight = window.innerHeight;
+    }
+    updateSlideHeight();
+    window.addEventListener('resize', updateSlideHeight);
+
+    function showLines(slide, delay) {
+        delay = delay || 0;
+        var lines = slide.querySelectorAll('.line, .play-btn, .inline-btn');
+        lines.forEach(function(line, index) {
+            setTimeout(function() {
+                line.classList.add('visible');
+            }, delay + (index * 180));
+        });
+    }
+
+    function hideAllLines() {
+        document.querySelectorAll('.line, .play-btn, .inline-btn').forEach(function(el) {
+            el.classList.remove('visible');
+        });
+    }
+
+    function updateProgress() {
+        var progress = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = progress + '%';
+    }
+
+    function goToSlide(index) {
+        if (index < 0 || index >= totalSlides || isAnimating) return;
+        isAnimating = true;
+
+        currentSlide = index;
+        var offset = -(index * slideHeight);
+        container.style.transform = 'translateY(' + offset + 'px)';
+
+        updateProgress();
+        hideAllLines();
+
+        setTimeout(function() {
+            var slide = slides[index];
+            var content = slide.querySelector('.slide-content');
+            content.classList.add('visible');
+            showLines(slide, 300);
+            isAnimating = false;
+        }, 500);
+
+        slides.forEach(function(slide, i) {
+            if (i !== index) {
+                slide.querySelector('.slide-content').classList.remove('visible');
+            }
+        });
+
+        if (index > 0) {
+            scrollHint.style.opacity = '0';
+            scrollHint.style.transition = 'opacity 0.5s ease';
+        }
+    }
+
+    function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+            goToSlide(currentSlide + 1);
+        }
+    }
+
+    function prevSlide() {
+        if (currentSlide > 0) {
+            goToSlide(currentSlide - 1);
+        }
+    }
+
+    function handleSwipe() {
+        var diff = touchStartY - touchEndY;
+        var threshold = 50;
+        if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        }
+    }
+
+    document.addEventListener('touchstart', function(e) {
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', function(e) {
+        touchEndY = e.changedTouches[0].screenY;
+        handleSwipe();
+    }, { passive: true });
+
+    var wheelTimeout;
+    document.addEventListener('wheel', function(e) {
+        if (wheelTimeout) return;
+        wheelTimeout = setTimeout(function() {
+            wheelTimeout = null;
+        }, 800);
+        if (e.deltaY > 0) {
+            nextSlide();
+        } else if (e.deltaY < 0) {
+            prevSlide();
+        }
+    }, { passive: true });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            nextSlide();
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevSlide();
+        }
+    });
+
+    // ===== PLAY BUTTON =====
+    playBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        console.log('=== PLAY BUTTON CLICKED ===');
+        playSong();
+        nextSlide();
+    });
+
+    // Warm up on first touch
+    var warmedUp = false;
+    function warmUpOnce(e) {
+        if (warmedUp) return;
+        warmedUp = true;
+        console.log('=== FIRST TOUCH ===');
+        createAudio();
+        unlockAudioElement();
+        preloadAudio();
+    }
+    document.addEventListener('touchstart', warmUpOnce, { passive: true, once: true });
+    document.addEventListener('click', warmUpOnce, { once: true });
+
+    // ===== INLINE REPLAY =====
+    inlineReplayBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        console.log('=== REPLAY CLICKED ===');
+        restartSong();
+
+        hideAllLines();
+        currentSlide = 0;
+        container.style.transform = 'translateY(0px)';
+        updateProgress();
+
+        setTimeout(function() {
+            var firstSlide = slides[0];
+            firstSlide.querySelector('.slide-content').classList.add('visible');
+            showLines(firstSlide, 300);
+            isAnimating = false;
+        }, 600);
+    });
+
+    document.body.addEventListener('touchmove', function(e) {
+        if (e.target === document.body || e.target === container) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    function init() {
+        updateSlideHeight();
+        var firstSlide = slides[0];
+        firstSlide.querySelector('.slide-content').classList.add('visible');
+        showLines(firstSlide, 600);
+        updateProgress();
+        preloadAudio();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();

@@ -13,28 +13,23 @@
     var isAnimating = false;
     var touchStartY = 0;
     var touchEndY = 0;
-    var musicStarted = false;
     var slideHeight = 0;
 
-    // Create scroll hint
-    var scrollHint = document.createElement('div');
-    scrollHint.className = 'scroll-hint';
-    document.querySelector('.viewport').appendChild(scrollHint);
-
-    // Create audio indicator
     var audioIndicator = document.createElement('div');
     audioIndicator.className = 'audio-indicator';
     audioIndicator.innerHTML = '<span></span><span></span><span></span><span></span>';
     document.querySelector('.viewport').appendChild(audioIndicator);
 
-    // Measure slide height
+    var scrollHint = document.createElement('div');
+    scrollHint.className = 'scroll-hint';
+    document.querySelector('.viewport').appendChild(scrollHint);
+
     function updateSlideHeight() {
         slideHeight = window.innerHeight;
     }
     updateSlideHeight();
     window.addEventListener('resize', updateSlideHeight);
 
-    // Show lines with stagger
     function showLines(slide, delay) {
         delay = delay || 0;
         var lines = slide.querySelectorAll('.line, .play-btn, .inline-btn');
@@ -45,20 +40,17 @@
         });
     }
 
-    // Hide all lines
     function hideAllLines() {
         document.querySelectorAll('.line, .play-btn, .inline-btn').forEach(function(el) {
             el.classList.remove('visible');
         });
     }
 
-    // Update progress bar
     function updateProgress() {
         var progress = ((currentSlide + 1) / totalSlides) * 100;
         progressBar.style.width = progress + '%';
     }
 
-    // Go to slide — use px instead of vh for transform
     function goToSlide(index) {
         if (index < 0 || index >= totalSlides || isAnimating) return;
         isAnimating = true;
@@ -104,8 +96,7 @@
 
     function handleSwipe() {
         var diff = touchStartY - touchEndY;
-        var threshold = 50;
-        if (Math.abs(diff) > threshold) {
+        if (Math.abs(diff) > 50) {
             if (diff > 0) {
                 nextSlide();
             } else {
@@ -146,99 +137,38 @@
         }
     });
 
-    // ===== AUDIO: iOS Safari compatible =====
+    // Play button - direct audio play
+    playBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
 
-    // Warm up audio context on first user interaction
-    var audioContext = null;
-    function warmUpAudio() {
-        if (audioContext) return;
-        try {
-            var AC = window.AudioContext || window.webkitAudioContext;
-            if (AC) {
-                audioContext = new AC();
-                // Create and play silent buffer to unlock
-                var buffer = audioContext.createBuffer(1, 1, 22050);
-                var source = audioContext.createBufferSource();
-                source.buffer = buffer;
-                source.connect(audioContext.destination);
-                if (source.start) {
-                    source.start(0);
-                } else if (source.noteOn) {
-                    source.noteOn(0);
-                }
-            }
-        } catch (e) {
-            // AudioContext not available
-        }
-    }
-
-    // Play audio — must be called from user gesture
-    function playAudio() {
-        // iOS: need to warm up on first interaction
-        warmUpAudio();
-
-        // Reset and play
-        audio.currentTime = 0;
-
-        // For iOS: set muted false explicitly
+        // Try to play audio
         audio.muted = false;
-
-        var promise = audio.play();
-        if (promise !== undefined) {
-            promise.then(function() {
+        var p = audio.play();
+        if (p !== undefined) {
+            p.then(function() {
                 audioIndicator.classList.add('active');
-            }).catch(function(err) {
-                console.log('Audio play error:', err);
-                // Try once more after a tick
-                setTimeout(function() {
-                    audio.play().then(function() {
-                        audioIndicator.classList.add('active');
-                    }).catch(function(err2) {
-                        console.log('Audio retry failed:', err2);
-                    });
-                }, 50);
-            });
+            }).catch(function() {});
         } else {
             audioIndicator.classList.add('active');
         }
-    }
 
-    // Play button click
-    playBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        if (!musicStarted) {
-            musicStarted = true;
-            playAudio();
-        }
         nextSlide();
     });
 
-    // Also warm up on any touch anywhere (before play button)
-    var warmedUp = false;
-    function warmUpOnce() {
-        if (warmedUp) return;
-        warmedUp = true;
-        warmUpAudio();
-        // Also try to load metadata
-        audio.load();
-    }
-    document.addEventListener('touchstart', warmUpOnce, { passive: true, once: true });
-    document.addEventListener('click', warmUpOnce, { once: true });
-
-    // Inline replay button
+    // Replay button
     inlineReplayBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        // Reset and play audio
+        e.preventDefault();
+
         audio.currentTime = 0;
         audio.muted = false;
         audio.play().catch(function() {});
         audioIndicator.classList.add('active');
 
-        // Reset slides
         hideAllLines();
         currentSlide = 0;
-        var offset = 0;
-        container.style.transform = 'translateY(' + offset + 'px)';
+        container.style.transform = 'translateY(0px)';
         updateProgress();
 
         setTimeout(function() {
@@ -249,14 +179,14 @@
         }, 600);
     });
 
-    // Prevent pull-to-refresh on iOS
+    // Prevent pull-to-refresh
     document.body.addEventListener('touchmove', function(e) {
         if (e.target === document.body || e.target === container) {
             e.preventDefault();
         }
     }, { passive: false });
 
-    // Initialize
+    // Init
     function init() {
         updateSlideHeight();
         var firstSlide = slides[0];

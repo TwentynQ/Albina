@@ -160,7 +160,8 @@
             return Promise.resolve(audioBuffer);
         }
         
-        return fetch('./audio/song.mp3')
+        // FIXED: file is in root, not in audio/ folder
+        return fetch('./song.mp3')
             .then(function(response) {
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 return response.arrayBuffer();

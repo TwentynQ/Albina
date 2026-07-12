@@ -1,134 +1,62 @@
 (function() {
     'use strict';
 
-    // ===== AUDIO ENGINE =====
+    // ===== AUDIO =====
     var AUDIO_URL = 'audio/song.mp3';
     var SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
 
     var audio = null;
-    var audioUnlocked = false;
-    var musicPlaying = false;
-    var blobUrl = null;
-
-    // Preload audio as blob (bypasses iOS HTTP restrictions)
-    function preloadAudio() {
-        fetch(AUDIO_URL)
-            .then(function(response) {
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                return response.blob();
-            })
-            .then(function(blob) {
-                blobUrl = URL.createObjectURL(blob);
-                console.log('Audio preloaded as blob');
-            })
-            .catch(function(err) {
-                console.log('Preload failed, will use direct URL:', err);
-            });
-    }
+    var unlocked = false;
 
     function createAudio() {
         if (audio) return;
         audio = new Audio();
         audio.loop = true;
-        audio.preload = 'metadata';
         audio.setAttribute('playsinline', '');
         audio.setAttribute('webkit-playsinline', '');
-        console.log('Audio object created');
     }
 
-    function unlockAudioElement() {
-        if (audioUnlocked || !audio) {
-            console.log('Unlock skipped: unlocked=' + audioUnlocked + ', audio=' + !!audio);
-            return;
-        }
-
+    function unlock() {
+        if (unlocked || !audio) return;
         audio.src = SILENT_WAV;
         audio.muted = true;
         audio.volume = 0;
-
-        console.log('Trying silent unlock...');
-        var playPromise = audio.play();
-        if (playPromise !== undefined) {
-            playPromise.then(function() {
-                console.log('Silent unlock SUCCESS');
-                audioUnlocked = true;
+        var p = audio.play();
+        if (p !== undefined) {
+            p.then(function() {
+                unlocked = true;
                 audio.pause();
                 audio.currentTime = 0;
                 audio.muted = false;
                 audio.volume = 1;
-            }).catch(function(err) {
-                console.log('Silent unlock FAILED:', err.name, err.message);
-            });
+            }).catch(function() {});
         } else {
-            console.log('No promise (old browser), assuming unlocked');
-            audioUnlocked = true;
+            unlocked = true;
         }
     }
 
-    function playSong() {
-        console.log('playSong called, unlocked=' + audioUnlocked);
+    function playMusic() {
         if (!audio) createAudio();
-
-        var srcToUse = blobUrl || AUDIO_URL;
-        console.log('Using src:', srcToUse.substring(0, 50));
-
-        if (!audioUnlocked) {
-            console.log('Not unlocked, doing silent unlock first');
-            unlockAudioElement();
+        if (!unlocked) {
+            unlock();
             setTimeout(function() {
-                console.log('Setting real src after unlock');
-                audio.src = srcToUse;
-                audio.load();
-                var p = audio.play();
-                if (p !== undefined) {
-                    p.then(function() {
-                        console.log('Real play SUCCESS after unlock');
-                        musicPlaying = true;
-                        updateAudioIndicator();
-                    }).catch(function(err) {
-                        console.log('Real play FAILED after unlock:', err.name);
-                    });
-                }
-            }, 150);
+                audio.src = AUDIO_URL;
+                audio.play().catch(function() {});
+            }, 100);
             return;
         }
-
-        console.log('Already unlocked, playing directly');
-        audio.src = srcToUse;
-        audio.load();
-        var promise = audio.play();
-        if (promise !== undefined) {
-            promise.then(function() {
-                console.log('Direct play SUCCESS');
-                musicPlaying = true;
-                updateAudioIndicator();
-            }).catch(function(err) {
-                console.log('Direct play FAILED:', err.name);
-            });
-        } else {
-            musicPlaying = true;
-            updateAudioIndicator();
-        }
+        audio.src = AUDIO_URL;
+        audio.play().catch(function() {});
     }
 
-    function restartSong() {
-        console.log('restartSong called');
+    function restartMusic() {
         if (audio) {
             audio.currentTime = 0;
-            var p = audio.play();
-            if (p !== undefined) {
-                p.then(function() {
-                    musicPlaying = true;
-                    updateAudioIndicator();
-                }).catch(function() {});
-            } else {
-                musicPlaying = true;
-                updateAudioIndicator();
-            }
+            audio.play().catch(function() {});
         }
     }
 
-    // ===== SLIDES ENGINE =====
+    // ===== SLIDES =====
     var container = document.getElementById('slidesContainer');
     var slides = document.querySelectorAll('.slide');
     var progressBar = document.getElementById('progressBar');
@@ -142,19 +70,13 @@
     var touchEndY = 0;
     var slideHeight = 0;
 
+    // Audio indicator
     var audioIndicator = document.createElement('div');
     audioIndicator.className = 'audio-indicator';
     audioIndicator.innerHTML = '<span></span><span></span><span></span><span></span>';
     document.querySelector('.viewport').appendChild(audioIndicator);
 
-    function updateAudioIndicator() {
-        if (musicPlaying) {
-            audioIndicator.classList.add('active');
-        } else {
-            audioIndicator.classList.remove('active');
-        }
-    }
-
+    // Scroll hint
     var scrollHint = document.createElement('div');
     scrollHint.className = 'scroll-hint';
     document.querySelector('.viewport').appendChild(scrollHint);
@@ -231,8 +153,7 @@
 
     function handleSwipe() {
         var diff = touchStartY - touchEndY;
-        var threshold = 50;
-        if (Math.abs(diff) > threshold) {
+        if (Math.abs(diff) > 50) {
             if (diff > 0) {
                 nextSlide();
             } else {
@@ -273,34 +194,30 @@
         }
     });
 
-    // ===== PLAY BUTTON =====
+    // Play button
     playBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         e.preventDefault();
-        console.log('=== PLAY BUTTON CLICKED ===');
-        playSong();
+        playMusic();
         nextSlide();
     });
 
-    // Warm up on first touch
+    // First touch unlock
     var warmedUp = false;
-    function warmUpOnce(e) {
+    function warmUpOnce() {
         if (warmedUp) return;
         warmedUp = true;
-        console.log('=== FIRST TOUCH ===');
         createAudio();
-        unlockAudioElement();
-        preloadAudio();
+        unlock();
     }
     document.addEventListener('touchstart', warmUpOnce, { passive: true, once: true });
     document.addEventListener('click', warmUpOnce, { once: true });
 
-    // ===== INLINE REPLAY =====
+    // Replay button
     inlineReplayBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         e.preventDefault();
-        console.log('=== REPLAY CLICKED ===');
-        restartSong();
+        restartMusic();
 
         hideAllLines();
         currentSlide = 0;
@@ -315,19 +232,20 @@
         }, 600);
     });
 
+    // Prevent pull-to-refresh
     document.body.addEventListener('touchmove', function(e) {
         if (e.target === document.body || e.target === container) {
             e.preventDefault();
         }
     }, { passive: false });
 
+    // Init
     function init() {
         updateSlideHeight();
         var firstSlide = slides[0];
         firstSlide.querySelector('.slide-content').classList.add('visible');
         showLines(firstSlide, 600);
         updateProgress();
-        preloadAudio();
     }
 
     if (document.readyState === 'loading') {

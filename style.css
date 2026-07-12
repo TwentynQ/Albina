@@ -17,11 +17,13 @@ body {
     min-height: 100dvh;
     background: #0a0a0a;
     color: #f5f0e8;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Caveat', cursive;
+    font-size: clamp(1.4rem, 5vw, 1.8rem);
+    line-height: 1.6;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     padding: 40px 20px;
     padding-top: calc(40px + env(safe-area-inset-top));
     padding-bottom: calc(40px + env(safe-area-inset-bottom));
@@ -51,28 +53,74 @@ body::before {
     max-width: 500px;
     width: 100%;
     text-align: center;
+}
+
+/* Typewriter effect */
+.typewriter {
+    overflow: hidden;
+    white-space: nowrap;
     opacity: 0;
-    animation: fadeIn 2s ease forwards;
+    margin: 0 auto;
+    width: 0;
+    animation: typing 0.8s steps(30, end) forwards;
 }
 
-@keyframes fadeIn {
-    to { opacity: 1; }
+@keyframes typing {
+    from { width: 0; opacity: 1; }
+    to { width: 100%; opacity: 1; }
 }
 
-h1 {
-    font-size: clamp(1.8rem, 6vw, 2.5rem);
-    font-weight: 300;
+/* Staggered delays for each line */
+.poem p:nth-child(1) { animation-delay: 0.5s; }
+.poem p:nth-child(2) { animation-delay: 1.5s; }
+.poem p:nth-child(3) { animation-delay: 2.5s; }
+.poem p:nth-child(4) { animation-delay: 3.5s; }
+.poem p:nth-child(5) { animation-delay: 4.5s; }
+.poem p:nth-child(6) { animation-delay: 5.5s; }
+.poem p:nth-child(7) { animation-delay: 6.5s; }
+.poem p:nth-child(8) { animation-delay: 7.5s; }
+.poem p:nth-child(9) { animation-delay: 8.5s; }
+.poem p:nth-child(10) { animation-delay: 9.5s; }
+.poem p:nth-child(11) { animation-delay: 10.5s; }
+.poem p:nth-child(12) { animation-delay: 11.5s; }
+.poem p:nth-child(13) { animation-delay: 12.5s; }
+.poem p:nth-child(14) { animation-delay: 13.5s; }
+.poem p:nth-child(15) { animation-delay: 14.5s; }
+.poem p:nth-child(16) { animation-delay: 15.5s; }
+.poem p:nth-child(17) { animation-delay: 16.5s; }
+.poem p:nth-child(18) { animation-delay: 17.5s; }
+.poem p:nth-child(19) { animation-delay: 18.5s; }
+.poem p:nth-child(20) { animation-delay: 19.5s; }
+.poem p:nth-child(21) { animation-delay: 20.5s; }
+.poem p:nth-child(22) { animation-delay: 21.5s; }
+.poem p:nth-child(23) { animation-delay: 22.5s; }
+.poem p:nth-child(24) { animation-delay: 23.5s; }
+.poem p:nth-child(25) { animation-delay: 24.5s; }
+.poem p:nth-child(26) { animation-delay: 25.5s; }
+.poem p:nth-child(27) { animation-delay: 26.5s; }
+.poem p:nth-child(28) { animation-delay: 27.5s; }
+.poem p:nth-child(29) { animation-delay: 28.5s; }
+.poem p:nth-child(30) { animation-delay: 29.5s; }
+.poem p:nth-child(31) { animation-delay: 30.5s; }
+.poem p:nth-child(32) { animation-delay: 31.5s; }
+
+h1.typewriter {
+    font-family: 'Marck Script', cursive;
+    font-size: clamp(2.5rem, 8vw, 3.5rem);
+    font-weight: 400;
     margin-bottom: 30px;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     color: #d4af37;
+    animation-delay: 0s;
+    animation-duration: 1.2s;
 }
 
 .poem {
-    font-size: clamp(1rem, 3.5vw, 1.3rem);
-    line-height: 2;
-    font-weight: 300;
     margin-bottom: 40px;
-    white-space: pre-line;
+}
+
+.poem p {
+    margin: 2px 0;
 }
 
 .poem .highlight {
@@ -81,17 +129,21 @@ h1 {
 }
 
 .age {
-    font-size: clamp(3rem, 10vw, 5rem);
-    font-weight: 200;
+    font-family: 'Marck Script', cursive;
+    font-size: clamp(4rem, 12vw, 6rem);
+    font-weight: 400;
     color: #d4af37;
-    margin: 20px 0;
-    font-family: 'Montserrat', sans-serif;
-    letter-spacing: 5px;
+    margin: 10px 0;
+    letter-spacing: 3px;
 }
 
+/* Buttons appear after text */
 .button-wrapper {
     margin-top: 30px;
     margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeIn 1s ease forwards;
+    animation-delay: 32s;
 }
 
 .play-button,
@@ -100,11 +152,10 @@ h1 {
     border: 1px solid rgba(212, 175, 55, 0.5);
     color: #d4af37;
     padding: 15px 40px;
-    font-size: 1rem;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 300;
-    letter-spacing: 3px;
-    text-transform: uppercase;
+    font-size: 1.2rem;
+    font-family: 'Caveat', cursive;
+    font-weight: 500;
+    letter-spacing: 2px;
     cursor: pointer;
     transition: all 0.4s ease;
     position: relative;
@@ -223,15 +274,15 @@ audio {
     display: flex;
     justify-content: space-between;
     margin-top: 8px;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.75rem;
+    font-family: 'Caveat', cursive;
+    font-size: 0.9rem;
     color: rgba(245, 240, 232, 0.5);
 }
 
 .final-message {
     margin-top: 30px;
     font-style: italic;
-    font-size: clamp(1.1rem, 4vw, 1.4rem);
+    font-size: clamp(1.5rem, 5vw, 2rem);
     color: #d4af37;
     opacity: 0;
     transform: translateY(20px);
@@ -243,13 +294,17 @@ audio {
     transform: translateY(0);
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 @media (max-height: 600px) {
-    .poem {
-        line-height: 1.8;
-        font-size: clamp(0.9rem, 3vw, 1.1rem);
+    body {
+        font-size: clamp(1.2rem, 4vw, 1.5rem);
     }
     .age {
-        margin: 10px 0;
+        margin: 5px 0;
     }
 }
 

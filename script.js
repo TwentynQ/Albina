@@ -6,7 +6,7 @@
     var progressBar = document.getElementById('progressBar');
     var playBtn = document.getElementById('playBtn');
     var inlineReplayBtn = document.getElementById('inlineReplayBtn');
-    var audio = document.getElementById('bgAudio');
+    var audioError = document.getElementById('audioError');
 
     var totalSlides = slides.length;
     var currentSlide = 0;
@@ -14,6 +14,14 @@
     var touchStartY = 0;
     var touchEndY = 0;
     var slideHeight = 0;
+
+    // Web Audio API variables
+    var audioCtx = null;
+    var audioBuffer = null;
+    var currentSource = null;
+    var isPlaying = false;
+    var startTime = 0;
+    var pauseTime = 0;
 
     var audioIndicator = document.createElement('div');
     audioIndicator.className = 'audio-indicator';
@@ -137,23 +145,128 @@
         }
     });
 
-    // Play button - direct audio play
+    // ===== WEB AUDIO API =====
+
+    function initAudioContext() {
+        if (audioCtx) return;
+        var AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) {
+            console.log('Web Audio API not supported');
+            return;
+        }
+        audioCtx = new AudioContext();
+    }
+
+    function loadAudio() {
+        if (audioBuffer) return Promise.resolve(audioBuffer);
+        
+        return fetch('audio/song.mp3')
+            .then(function(response) {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.arrayBuffer();
+            })
+            .then(function(arrayBuffer) {
+                if (!audioCtx) initAudioContext();
+                return audioCtx.decodeAudioData(arrayBuffer);
+            })
+            .then(function(decodedBuffer) {
+                audioBuffer = decodedBuffer;
+                console.log('Audio loaded, duration:', audioBuffer.duration);
+                return audioBuffer;
+            })
+            .catch(function(error) {
+                console.log('Audio load failed:', error.message);
+                if (audioError) {
+                    audioError.textContent = 'Не удалось загрузить аудио: ' + error.message;
+                    audioError.style.display = 'block';
+                }
+                throw error;
+            });
+    }
+
+    function playAudio() {
+        if (!audioCtx) initAudioContext();
+        
+        // Resume context if suspended (iOS requirement)
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        // Stop current playback
+        if (currentSource) {
+            try { currentSource.stop(); } catch(e) {}
+            currentSource = null;
+        }
+
+        // Create new source
+        currentSource = audioCtx.createBufferSource();
+        currentSource.buffer = audioBuffer;
+        currentSource.loop = true;
+        currentSource.connect(audioCtx.destination);
+        
+        startTime = audioCtx.currentTime - pauseTime;
+        currentSource.start(0, pauseTime);
+        isPlaying = true;
+        audioIndicator.classList.add('active');
+        
+        currentSource.onended = function() {
+            if (isPlaying) {
+                pauseTime = 0;
+                playAudio();
+            }
+        };
+    }
+
+    function stopAudio() {
+        if (currentSource) {
+            try { currentSource.stop(); } catch(e) {}
+            currentSource = null;
+        }
+        if (audioCtx) {
+            pauseTime = audioCtx.currentTime - startTime;
+        }
+        isPlaying = false;
+        audioIndicator.classList.remove('active');
+    }
+
+    function restartAudio() {
+        pauseTime = 0;
+        if (audioBuffer) {
+            playAudio();
+        } else {
+            loadAudio().then(function() {
+                playAudio();
+            }).catch(function() {});
+        }
+    }
+
+    // Preload audio on first interaction
+    var preloaded = false;
+    function preloadOnce() {
+        if (preloaded) return;
+        preloaded = true;
+        initAudioContext();
+        loadAudio().catch(function() {});
+    }
+    document.addEventListener('touchstart', preloadOnce, { passive: true, once: true });
+    document.addEventListener('click', preloadOnce, { once: true });
+
+    // Play button
     playBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         e.preventDefault();
 
-        // Try to play audio
-        audio.muted = false;
-        var p = audio.play();
-        if (p !== undefined) {
-            p.then(function() {
-                audioIndicator.classList.add('active');
-            }).catch(function() {});
+        if (audioBuffer) {
+            playAudio();
+            nextSlide();
         } else {
-            audioIndicator.classList.add('active');
+            loadAudio().then(function() {
+                playAudio();
+                nextSlide();
+            }).catch(function() {
+                nextSlide();
+            });
         }
-
-        nextSlide();
     });
 
     // Replay button
@@ -161,10 +274,7 @@
         e.stopPropagation();
         e.preventDefault();
 
-        audio.currentTime = 0;
-        audio.muted = false;
-        audio.play().catch(function() {});
-        audioIndicator.classList.add('active');
+        restartAudio();
 
         hideAllLines();
         currentSlide = 0;

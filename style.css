@@ -19,16 +19,16 @@ body {
     color: #f5f0e8;
     font-family: 'Caveat', cursive;
     font-size: clamp(1.4rem, 5vw, 1.8rem);
-    line-height: 1.6;
+    line-height: 1.5;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 20px;
-    padding-top: calc(40px + env(safe-area-inset-top));
-    padding-bottom: calc(40px + env(safe-area-inset-bottom));
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    padding: 30px 20px;
+    padding-top: calc(30px + env(safe-area-inset-top));
+    padding-bottom: calc(30px + env(safe-area-inset-bottom));
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
     overflow-x: hidden;
     position: relative;
 }
@@ -53,74 +53,29 @@ body::before {
     max-width: 500px;
     width: 100%;
     text-align: center;
-}
-
-/* Typewriter effect */
-.typewriter {
-    overflow: hidden;
-    white-space: nowrap;
     opacity: 0;
-    margin: 0 auto;
-    width: 0;
-    animation: typing 0.8s steps(30, end) forwards;
+    animation: fadeIn 1.5s ease forwards;
 }
 
-@keyframes typing {
-    from { width: 0; opacity: 1; }
-    to { width: 100%; opacity: 1; }
+@keyframes fadeIn {
+    to { opacity: 1; }
 }
 
-/* Staggered delays for each line */
-.poem p:nth-child(1) { animation-delay: 0.5s; }
-.poem p:nth-child(2) { animation-delay: 1.5s; }
-.poem p:nth-child(3) { animation-delay: 2.5s; }
-.poem p:nth-child(4) { animation-delay: 3.5s; }
-.poem p:nth-child(5) { animation-delay: 4.5s; }
-.poem p:nth-child(6) { animation-delay: 5.5s; }
-.poem p:nth-child(7) { animation-delay: 6.5s; }
-.poem p:nth-child(8) { animation-delay: 7.5s; }
-.poem p:nth-child(9) { animation-delay: 8.5s; }
-.poem p:nth-child(10) { animation-delay: 9.5s; }
-.poem p:nth-child(11) { animation-delay: 10.5s; }
-.poem p:nth-child(12) { animation-delay: 11.5s; }
-.poem p:nth-child(13) { animation-delay: 12.5s; }
-.poem p:nth-child(14) { animation-delay: 13.5s; }
-.poem p:nth-child(15) { animation-delay: 14.5s; }
-.poem p:nth-child(16) { animation-delay: 15.5s; }
-.poem p:nth-child(17) { animation-delay: 16.5s; }
-.poem p:nth-child(18) { animation-delay: 17.5s; }
-.poem p:nth-child(19) { animation-delay: 18.5s; }
-.poem p:nth-child(20) { animation-delay: 19.5s; }
-.poem p:nth-child(21) { animation-delay: 20.5s; }
-.poem p:nth-child(22) { animation-delay: 21.5s; }
-.poem p:nth-child(23) { animation-delay: 22.5s; }
-.poem p:nth-child(24) { animation-delay: 23.5s; }
-.poem p:nth-child(25) { animation-delay: 24.5s; }
-.poem p:nth-child(26) { animation-delay: 25.5s; }
-.poem p:nth-child(27) { animation-delay: 26.5s; }
-.poem p:nth-child(28) { animation-delay: 27.5s; }
-.poem p:nth-child(29) { animation-delay: 28.5s; }
-.poem p:nth-child(30) { animation-delay: 29.5s; }
-.poem p:nth-child(31) { animation-delay: 30.5s; }
-.poem p:nth-child(32) { animation-delay: 31.5s; }
-
-h1.typewriter {
+h1 {
     font-family: 'Marck Script', cursive;
-    font-size: clamp(2.5rem, 8vw, 3.5rem);
+    font-size: clamp(2.2rem, 7vw, 3rem);
     font-weight: 400;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     letter-spacing: 1px;
     color: #d4af37;
-    animation-delay: 0s;
-    animation-duration: 1.2s;
 }
 
 .poem {
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .poem p {
-    margin: 2px 0;
+    margin: 3px 0;
 }
 
 .poem .highlight {
@@ -130,20 +85,17 @@ h1.typewriter {
 
 .age {
     font-family: 'Marck Script', cursive;
-    font-size: clamp(4rem, 12vw, 6rem);
+    font-size: clamp(3.5rem, 10vw, 5rem);
     font-weight: 400;
     color: #d4af37;
-    margin: 10px 0;
+    margin: 8px 0;
     letter-spacing: 3px;
+    line-height: 1.2;
 }
 
-/* Buttons appear after text */
 .button-wrapper {
-    margin-top: 30px;
-    margin-bottom: 20px;
-    opacity: 0;
-    animation: fadeIn 1s ease forwards;
-    animation-delay: 32s;
+    margin-top: 25px;
+    margin-bottom: 15px;
 }
 
 .play-button,
@@ -151,8 +103,8 @@ h1.typewriter {
     background: transparent;
     border: 1px solid rgba(212, 175, 55, 0.5);
     color: #d4af37;
-    padding: 15px 40px;
-    font-size: 1.2rem;
+    padding: 12px 35px;
+    font-size: 1.3rem;
     font-family: 'Caveat', cursive;
     font-weight: 500;
     letter-spacing: 2px;
@@ -246,7 +198,7 @@ audio {
 .progress-container {
     width: 100%;
     max-width: 300px;
-    margin: 20px auto;
+    margin: 15px auto;
     opacity: 0;
     transition: opacity 0.5s ease;
 }
@@ -275,12 +227,12 @@ audio {
     justify-content: space-between;
     margin-top: 8px;
     font-family: 'Caveat', cursive;
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: rgba(245, 240, 232, 0.5);
 }
 
 .final-message {
-    margin-top: 30px;
+    margin-top: 20px;
     font-style: italic;
     font-size: clamp(1.5rem, 5vw, 2rem);
     color: #d4af37;
@@ -294,21 +246,4 @@ audio {
     transform: translateY(0);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@media (max-height: 600px) {
-    body {
-        font-size: clamp(1.2rem, 4vw, 1.5rem);
-    }
-    .age {
-        margin: 5px 0;
-    }
-}
-
-.no-select {
-    -webkit-user-select: none;
-    user-select: none;
-}
+@media (max-height: 600

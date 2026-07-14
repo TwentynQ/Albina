@@ -3,87 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>Альбина</title>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Marck+Script&display=swap" rel="stylesheet">
+    <title>35</title>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0a0a0a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
-    <div class="container">
-        <h1>Привет, Альбина.</h1>
-        
-        <div class="poem">
-            <p>Сегодня тебе</p>
-            <p class="age">35</p>
-            <p>Красивый возраст.</p>
-            <p>Возраст,</p>
-            <p>когда уже многое понимаешь.</p>
-            <p>И всё ещё столько всего впереди.</p>
-            <p>Сегодня не будет</p>
-            <p>длинной открытки.</p>
-            <p>Иногда одной песни достаточно...</p>
-            <p>...чтобы сказать больше,</p>
-            <p>чем целой открыткой.</p>
-            <p>Помнишь?</p>
-            <p>Ты написала мне:</p>
-            <p class="highlight">«Божечки!!! Какая песня!!!»</p>
-            <p>Наверное,</p>
-            <p>некоторые песни становятся больше,</p>
-            <p>чем просто музыкой.</p>
-            <p>Я продолжаю видеть</p>
-            <p>в ней нас.</p>
-            <p>Спасибо.</p>
-            <p>За разговоры.</p>
-            <p>За смех.</p>
-            <p>За моменты,</p>
-            <p>когда становилось спокойно.</p>
-            <p>За ощущение,</p>
-            <p>что рядом можно быть настоящим.</p>
-            <p>Знаешь...</p>
-            <p>Если бы у меня была такая кнопка —</p>
-            <p>Я бы нажимал её</p>
-            <p>снова и снова.</p>
-            <p>Не потому что хочется вернуть время.</p>
-            <p>А потому что некоторые моменты</p>
-            <p>хочется почувствовать ещё раз.</p>
-        </div>
-
-        <div class="button-wrapper">
-            <button class="play-button no-select" id="playBtn">▶ Послушать</button>
-        </div>
-
-        <div class="progress-container" id="progressContainer">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
+    <div class="slides-container">
+        <section class="slide active" data-slide="1">
+            <div class="content">
+                <p class="text">Привет, Альбина.</p>
             </div>
-            <div class="time">
-                <span id="currentTime">0:00</span>
-                <span id="duration">0:00</span>
+        </section>
+
+        <section class="slide" data-slide="2">
+            <div class="content">
+                <p class="text">Сегодня тебе</p>
+                <p class="number">35</p>
+                <p class="text">Красивый возраст.</p>
             </div>
-        </div>
+        </section>
 
-        <div class="final-message" id="finalMessage">
-            <p>Ты прекрасна.</p>
-        </div>
+        <section class="slide" data-slide="3">
+            <div class="content">
+                <p class="text">Возраст,</p>
+                <p class="text">когда уже многое понимаешь.</p>
+                <p class="text">И всё ещё столько всего впереди.</p>
+            </div>
+        </section>
 
-        <div class="button-wrapper">
-            <button class="replay-button no-select" id="replayBtn">▶ Прожить сначала</button>
-        </div>
-    </div>
+        <section class="slide" data-slide="4">
+            <div class="content">
+                <p class="text">Сегодня не будет</p>
+                <p class="text">длинной открытки.</p>
+            </div>
+        </section>
 
-    <div class="notes" id="notes">
-        <span class="note" style="left: 10%; animation-delay: 0s;">♪</span>
-        <span class="note" style="left: 30%; animation-delay: 1s;">♫</span>
-        <span class="note" style="left: 50%; animation-delay: 2s;">♪</span>
-        <span class="note" style="left: 70%; animation-delay: 3s;">♫</span>
-        <span class="note" style="left: 90%; animation-delay: 4s;">♪</span>
+        <section class="slide" data-slide="5">
+            <div class="content">
+                <p class="text">Иногда одной песни достаточно...</p>
+                <p class="text">...чтобы сказать больше,</p>
+                <p class="text">чем целой открыткой.</p>
+            </div>
+        </section>
+
+        <section class="slide" data-slide="6">
+            <div class="content">
+                <button class="btn-play" id="playBtn">
+                    <span class="btn-icon">▶</span>
+                    <span class="btn-text">Послушать</span>
+                </button>
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="time">
+                        <span id="currentTime">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide" data-slide="7">
+            <div class="content">
+                <p class="text">Помнишь?</p>
+                <p class="text">Ты написала мне:</p>
+                <p class="text highlight">«Божечки!!! Какая песня!!!»</p>
+            </div>
+        </section>
+
+        <section class="slide" data-slide="8">
+            <div class="content">
+                <p class="text">Наверное,</p>
+                <p class="text">некоторые песни становятся больше,</p>
+                <p class="text">чем просто музыкой.</p>
+            </div>
+        </section>
+
+        <section class="slide" data-slide="9">
+            <div class="content">
+                <p class="text">Я продолжаю видеть</p>
+                <p class="text">в ней нас.</p>
+            </div>
+        </section>
+
+        <section class="slide" data-slide="10">
+            <div class="content">
+                <p class="text">Спасибо.</p>
+                <p class="text">За разговоры.</p>
+                <p class="text">За смех.</p>
+                <p class="text">За моменты,</p>
+                <p class="text">когда становилось спокойно.</p>
+            </div>
+        </section>
+
+        <section class="slide" data-slide="11">
+            <div class="content">
+                <p class="text">За ощущение,</p>
+                <p class="text">что рядом можно быть настоящим.</p>
+            </div>
+        </section>
+
+        <section class="slide" data-slide="12">
+            <div class="content">
+                <p class="text">Знаешь...</p>
+                <p class="text">Если бы у меня была такая кнопка —</p>
+                <p class="text">Я бы нажимал её</p>
+                <p class="text">снова и снова.</p>
+                <br>
+                <p class="text">Не потому что хочется вернуть время.</p>
+                <p class="text">А потому что некоторые моменты</p>
+                <p class="text">хочется почувствовать ещё раз.</p>
+                <br>
+                <p class="text final">Ты прекрасна.</p>
+                <button class="btn-replay" id="replayBtn">Прожить снова</button>
+            </div>
+        </section>
     </div>
 
     <audio id="audio" preload="none">
-        <source src="song.mp3" type="audio/mpeg">
+        <source src="audio/song.mp3" type="audio/mpeg">
     </audio>
 
     <script src="script.js"></script>

@@ -12,7 +12,7 @@ html, body {
     background: #000;
     color: #f5f0e8;
     font-family: 'Caveat', cursive;
-    font-weight: 300;
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -32,9 +32,9 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 50px 30px;
-    padding-top: max(50px, env(safe-area-inset-top));
-    padding-bottom: max(50px, env(safe-area-inset-bottom));
+    padding: 60px 30px;
+    padding-top: max(60px, env(safe-area-inset-top));
+    padding-bottom: max(60px, env(safe-area-inset-bottom));
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.8s ease;
@@ -49,16 +49,16 @@ html, body {
 
 .content {
     text-align: center;
-    max-width: 300px;
+    max-width: 340px;
 }
 
 .text {
-    font-size: clamp(1.1rem, 3.8vw, 1.4rem);
-    line-height: 1.7;
-    margin: 2px 0;
+    font-size: clamp(1.4rem, 5vw, 1.8rem);
+    line-height: 1.6;
+    margin: 4px 0;
     opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.5s ease;
+    transform: translateY(12px);
+    transition: all 0.6s ease;
 }
 
 .slide.active .text {
@@ -73,14 +73,14 @@ html, body {
 .slide.active .text:nth-child(5) { transition-delay: 0.7s; }
 
 .number {
-    font-size: clamp(3.5rem, 12vw, 5rem);
+    font-size: clamp(5rem, 18vw, 8rem);
     font-weight: 400;
     line-height: 1;
-    margin: 8px 0;
+    margin: 15px 0;
     color: #d4af37;
     opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.7s ease 0.2s;
+    transform: translateY(12px);
+    transition: all 0.8s ease 0.2s;
 }
 
 .slide.active .number {
@@ -95,18 +95,18 @@ html, body {
 
 .final {
     color: #d4af37;
-    font-weight: 400;
+    font-weight: 500;
 }
 
 /* Buttons */
 .btn-play {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     color: #f5f0e8;
-    padding: 12px 28px;
-    font-size: 1rem;
+    padding: 16px 36px;
+    font-size: 1.3rem;
     font-family: 'Caveat', cursive;
-    font-weight: 400;
+    font-weight: 500;
     cursor: pointer;
     border-radius: 100px;
     backdrop-filter: blur(20px);
@@ -114,11 +114,11 @@ html, body {
     transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     -webkit-appearance: none;
     opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.5s ease 0.3s;
+    transform: translateY(12px);
+    transition: all 0.6s ease 0.3s;
 }
 
 .slide.active .btn-play {
@@ -127,35 +127,35 @@ html, body {
 }
 
 .btn-play:active {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.12);
     transform: scale(0.97);
 }
 
 .btn-play.playing {
-    background: rgba(212, 175, 55, 0.1);
-    border-color: rgba(212, 175, 55, 0.25);
+    background: rgba(212, 175, 55, 0.12);
+    border-color: rgba(212, 175, 55, 0.3);
 }
 
 .btn-icon {
-    font-size: 0.6rem;
-    opacity: 0.5;
+    font-size: 0.7rem;
+    opacity: 0.6;
 }
 
 .btn-inline {
     background: transparent;
-    border: 1px solid rgba(212, 175, 55, 0.35);
+    border: 1px solid rgba(212, 175, 55, 0.4);
     color: #d4af37;
-    padding: 4px 14px;
-    font-size: 0.95rem;
+    padding: 6px 18px;
+    font-size: 1.2rem;
     font-family: 'Caveat', cursive;
-    font-weight: 400;
+    font-weight: 500;
     cursor: pointer;
     border-radius: 100px;
     transition: all 0.3s ease;
     -webkit-appearance: none;
-    margin: 6px 0;
+    margin: 8px 0;
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
     transition: all 0.5s ease;
 }
 
@@ -166,13 +166,13 @@ html, body {
 }
 
 .btn-inline:active {
-    background: rgba(212, 175, 55, 0.08);
+    background: rgba(212, 175, 55, 0.1);
     transform: scale(0.97);
 }
 
 /* Progress */
 .progress-container {
-    margin-top: 16px;
+    margin-top: 20px;
     opacity: 0;
     transition: opacity 0.5s ease;
 }
@@ -182,9 +182,9 @@ html, body {
 }
 
 .progress-bar {
-    width: 140px;
-    height: 1.5px;
-    background: rgba(255, 255, 255, 0.06);
+    width: 180px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 1px;
     margin: 0 auto;
     overflow: hidden;
@@ -192,7 +192,7 @@ html, body {
 
 .progress-fill {
     height: 100%;
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.4);
     width: 0%;
     transition: width 0.3s linear;
 }
@@ -200,7 +200,7 @@ html, body {
 .time {
     display: flex;
     justify-content: space-between;
-    margin-top: 5px;
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.25);
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.3);
 }

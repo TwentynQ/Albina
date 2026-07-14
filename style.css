@@ -12,9 +12,9 @@ html, body {
     background: #000;
     color: #f5f0e8;
     font-family: 'Caveat', cursive;
-    font-size: clamp(1.5rem, 5vw, 2rem);
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
     font-weight: 400;
-    line-height: 1.5;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -39,7 +39,7 @@ html, body {
     padding-bottom: max(40px, env(safe-area-inset-bottom));
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.8s ease;
     z-index: 1;
 }
 
@@ -51,14 +51,14 @@ html, body {
 
 .content {
     text-align: center;
-    max-width: 340px;
+    max-width: 320px;
 }
 
 .text {
-    margin: 4px 0;
+    margin: 3px 0;
     opacity: 0;
-    transform: translateY(15px);
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(10px);
+    transition: all 0.6s ease;
 }
 
 .slide.active .text {
@@ -67,25 +67,25 @@ html, body {
 }
 
 .slide.active .text:nth-child(1) { transition-delay: 0.1s; }
-.slide.active .text:nth-child(2) { transition-delay: 0.2s; }
-.slide.active .text:nth-child(3) { transition-delay: 0.3s; }
-.slide.active .text:nth-child(4) { transition-delay: 0.4s; }
-.slide.active .text:nth-child(5) { transition-delay: 0.5s; }
-.slide.active .text:nth-child(6) { transition-delay: 0.6s; }
-.slide.active .text:nth-child(7) { transition-delay: 0.7s; }
-.slide.active .text:nth-child(8) { transition-delay: 0.8s; }
-.slide.active .text:nth-child(9) { transition-delay: 0.9s; }
+.slide.active .text:nth-child(2) { transition-delay: 0.25s; }
+.slide.active .text:nth-child(3) { transition-delay: 0.4s; }
+.slide.active .text:nth-child(4) { transition-delay: 0.55s; }
+.slide.active .text:nth-child(5) { transition-delay: 0.7s; }
+.slide.active .text:nth-child(6) { transition-delay: 0.85s; }
+.slide.active .text:nth-child(7) { transition-delay: 1s; }
+.slide.active .text:nth-child(8) { transition-delay: 1.15s; }
+.slide.active .text:nth-child(9) { transition-delay: 1.3s; }
 
 .number {
-    font-family: 'Marck Script', cursive;
-    font-size: clamp(5rem, 18vw, 8rem);
-    font-weight: 400;
+    font-family: 'Caveat', cursive;
+    font-size: clamp(4rem, 14vw, 6rem);
+    font-weight: 700;
     line-height: 1;
-    margin: 15px 0;
+    margin: 10px 0;
     color: #d4af37;
     opacity: 0;
-    transform: translateY(15px);
-    transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+    transform: translateY(10px);
+    transition: all 0.8s ease 0.3s;
 }
 
 .slide.active .number {
@@ -99,17 +99,17 @@ html, body {
 }
 
 .final {
-    font-size: clamp(1.7rem, 5.5vw, 2.2rem);
+    font-size: clamp(1.4rem, 4.5vw, 1.8rem);
     color: #d4af37;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .btn-play {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: #f5f0e8;
-    padding: 16px 36px;
-    font-size: 1.3rem;
+    padding: 14px 32px;
+    font-size: 1.1rem;
     font-family: 'Caveat', cursive;
     font-weight: 500;
     cursor: pointer;
@@ -119,11 +119,11 @@ html, body {
     transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     -webkit-appearance: none;
     opacity: 0;
-    transform: translateY(15px);
-    transition: all 0.5s ease 0.3s;
+    transform: translateY(10px);
+    transition: all 0.6s ease 0.3s;
 }
 
 .slide.active .btn-play {
@@ -150,17 +150,17 @@ html, body {
     background: transparent;
     border: 1px solid rgba(212, 175, 55, 0.4);
     color: #d4af37;
-    padding: 6px 18px;
-    font-size: 1.2rem;
+    padding: 4px 14px;
+    font-size: 1rem;
     font-family: 'Caveat', cursive;
     font-weight: 500;
     cursor: pointer;
     border-radius: 100px;
     transition: all 0.3s ease;
     -webkit-appearance: none;
-    margin: 8px 0;
+    margin: 6px 0;
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
     transition: all 0.5s ease;
 }
 
@@ -176,7 +176,7 @@ html, body {
 }
 
 .progress-container {
-    margin-top: 25px;
+    margin-top: 20px;
     opacity: 0;
     transition: opacity 0.5s ease;
 }
@@ -186,7 +186,7 @@ html, body {
 }
 
 .progress-bar {
-    width: 180px;
+    width: 160px;
     height: 2px;
     background: rgba(255, 255, 255, 0.08);
     border-radius: 1px;
@@ -204,8 +204,7 @@ html, body {
 .time {
     display: flex;
     justify-content: space-between;
-    margin-top: 8px;
-    font-size: 0.85rem;
+    margin-top: 6px;
+    font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.3);
-    font-variant-numeric: tabular-nums;
 }

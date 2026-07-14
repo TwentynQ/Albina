@@ -1,4 +1,5 @@
 (function() {
+    const slides = document.querySelectorAll('.slide');
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('playBtn');
     const replayBtn = document.getElementById('replayBtn');
@@ -6,11 +7,34 @@
     const progressFill = document.getElementById('progressFill');
     const currentTimeEl = document.getElementById('currentTime');
     const durationEl = document.getElementById('duration');
-    const notes = document.getElementById('notes');
-    const finalMessage = document.getElementById('finalMessage');
 
+    let currentSlide = 0;
     let isPlaying = false;
     let hasStarted = false;
+    let touchStartY = 0;
+
+    function showSlide(index) {
+        slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === index);
+        });
+        currentSlide = index;
+    }
+
+    function nextSlide() {
+        if (currentSlide < slides.length - 1) {
+            showSlide(currentSlide + 1);
+        }
+    }
+
+    function prevSlide() {
+        if (currentSlide > 0) {
+            showSlide(currentSlide - 1);
+        }
+    }
+
+    function resetSlides() {
+        showSlide(0);
+    }
 
     function formatTime(seconds) {
         if (isNaN(seconds)) return '0:00';
@@ -30,18 +54,15 @@
 
     function playAudio() {
         const playPromise = audio.play();
-        
         if (playPromise !== undefined) {
             playPromise.then(() => {
                 isPlaying = true;
                 hasStarted = true;
-                playBtn.textContent = '❚❚ Пауза';
+                playBtn.querySelector('.btn-text').textContent = 'Пауза';
                 playBtn.classList.add('playing');
                 progressContainer.classList.add('visible');
-                notes.classList.add('active');
             }).catch(err => {
-                console.log('Ошибка воспроизведения:', err);
-                playBtn.textContent = '▶ Послушать';
+                console.log('Play error:', err);
             });
         }
     }
@@ -49,15 +70,12 @@
     function pauseAudio() {
         audio.pause();
         isPlaying = false;
-        playBtn.textContent = '▶ Продолжить';
+        playBtn.querySelector('.btn-text').textContent = 'Продолжить';
         playBtn.classList.remove('playing');
-        notes.classList.remove('active');
     }
 
     function handlePlayClick(e) {
-        e.preventDefault();
         e.stopPropagation();
-        
         if (!hasStarted) {
             audio.load();
             playAudio();
@@ -69,56 +87,75 @@
     }
 
     function handleReplayClick(e) {
-        e.preventDefault();
         e.stopPropagation();
-        
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+        resetSlides();
     }
 
-    audio.addEventListener('timeupdate', updateProgress);
-    
-    audio.addEventListener('ended', () => {
-        isPlaying = false;
-        playBtn.textContent = '▶ Послушать';
-        playBtn.classList.remove('playing');
-        notes.classList.remove('active');
-        finalMessage.classList.add('show');
-        replayBtn.classList.add('visible');
-        hasStarted = false;
+    // Swipe
+    document.addEventListener('touchstart', function(e) {
+        touchStartY = e.touches[0].clientY;
+    }, {passive: true});
+
+    document.addEventListener('touchend', function(e) {
+        const touchEndY = e.changedTouches[0].clientY;
+        const diff = touchStartY - touchEndY;
+        
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        }
+    }, {passive: true});
+
+    // Wheel
+    let wheelTimeout;
+    document.addEventListener('wheel', function(e) {
+        clearTimeout(wheelTimeout);
+        wheelTimeout = setTimeout(() => {
+            if (e.deltaY > 0) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        }, 50);
+    }, {passive: true});
+
+    // Keyboard
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            nextSlide();
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevSlide();
+        }
     });
 
+    // Audio events
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('ended', () => {
+        isPlaying = false;
+        playBtn.querySelector('.btn-text').textContent = 'Послушать';
+        playBtn.classList.remove('playing');
+        hasStarted = false;
+    });
     audio.addEventListener('loadedmetadata', () => {
         durationEl.textContent = formatTime(audio.duration);
     });
 
-    playBtn.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        handlePlayClick(e);
-    }, {passive: false});
-
+    // Buttons
     playBtn.addEventListener('click', handlePlayClick);
-
-    replayBtn.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        handleReplayClick(e);
-    }, {passive: false});
-
     replayBtn.addEventListener('click', handleReplayClick);
 
+    // iOS init
     document.body.addEventListener('touchstart', function initAudio() {
         audio.load();
         document.body.removeEventListener('touchstart', initAudio);
     }, {once: true});
 
-    playBtn.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-    }, {passive: false});
-
-    replayBtn.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-    }, {passive: false});
+    // Start
+    showSlide(0);
 
 })();

@@ -11,6 +11,7 @@
     var currentSlide = 0;
     var isPlaying = false;
     var touchStartY = 0;
+    var audioReady = false;
 
     function showSlide(index) {
         slides.forEach(function(slide, i) {
@@ -51,29 +52,54 @@
         }
     }
 
-    function toggleAudio() {
-        if (audio.paused) {
-            var playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(function() {
-                    isPlaying = true;
-                    playBtn.querySelector('.btn-text').textContent = 'Пауза';
-                    playBtn.classList.add('playing');
-                    progressContainer.classList.add('visible');
-                }).catch(function(err) {
-                    console.log('Audio play failed:', err);
-                });
-            }
-        } else {
-            audio.pause();
-            isPlaying = false;
-            playBtn.querySelector('.btn-text').textContent = 'Продолжить';
-            playBtn.classList.remove('playing');
+    function initAudio() {
+        if (!audioReady) {
+            audio.load();
+            audioReady = true;
         }
+    }
+
+    function playAudio() {
+        var playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(function() {
+                isPlaying = true;
+                playBtn.querySelector('.btn-text').textContent = 'Пауза';
+                playBtn.classList.add('playing');
+                progressContainer.classList.add('visible');
+            }).catch(function(err) {
+                console.log('Play failed:', err);
+            });
+        }
+    }
+
+    function pauseAudio() {
+        audio.pause();
+        isPlaying = false;
+        playBtn.querySelector('.btn-text').textContent = 'Продолжить';
+        playBtn.classList.remove('playing');
+    }
+
+    function handlePlayClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        initAudio();
+        if (audio.paused) {
+            playAudio();
+        } else {
+            pauseAudio();
+        }
+    }
+
+    function handleReplayClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        resetSlides();
     }
 
     document.addEventListener('touchstart', function(e) {
         touchStartY = e.touches[0].clientY;
+        initAudio();
     }, {passive: true});
 
     document.addEventListener('touchend', function(e) {
@@ -111,23 +137,34 @@
         durationEl.textContent = formatTime(audio.duration);
     });
 
-    playBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        toggleAudio();
-    });
-
     playBtn.addEventListener('touchstart', function(e) {
+        e.preventDefault();
         e.stopPropagation();
+        handlePlayClick(e);
     }, {passive: false});
 
-    replayBtn.addEventListener('click', function(e) {
+    playBtn.addEventListener('click', function(e) {
+        e.preventDefault();
         e.stopPropagation();
-        resetSlides();
+        handlePlayClick(e);
     });
 
     replayBtn.addEventListener('touchstart', function(e) {
+        e.preventDefault();
         e.stopPropagation();
+        handleReplayClick(e);
     }, {passive: false});
+
+    replayBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleReplayClick(e);
+    });
+
+    document.body.addEventListener('touchstart', function firstTouch() {
+        initAudio();
+        document.body.removeEventListener('touchstart', firstTouch);
+    }, {once: true});
 
     showSlide(0);
 

@@ -72,7 +72,6 @@
         }
     }
 
-    // Swipe
     document.addEventListener('touchstart', function(e) {
         touchStartY = e.touches[0].clientY;
     }, {passive: true});
@@ -84,7 +83,6 @@
         }
     }, {passive: true});
 
-    // Wheel
     var wheelTimeout;
     document.addEventListener('wheel', function(e) {
         clearTimeout(wheelTimeout);
@@ -93,7 +91,6 @@
         }, 50);
     }, {passive: true});
 
-    // Keyboard
     document.addEventListener('keydown', function(e) {
         if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
             e.preventDefault();
@@ -104,7 +101,6 @@
         }
     });
 
-    // Audio events
     audio.addEventListener('timeupdate', updateProgress);
     audio.addEventListener('ended', function() {
         isPlaying = false;
@@ -115,7 +111,6 @@
         durationEl.textContent = formatTime(audio.duration);
     });
 
-    // Buttons
     playBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         toggleAudio();
@@ -134,7 +129,6 @@
         e.stopPropagation();
     }, {passive: false});
 
-    // Start
     showSlide(0);
 
 })();

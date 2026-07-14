@@ -13,6 +13,18 @@
     var touchStartY = 0;
     var audioReady = false;
 
+    // Fullscreen API
+    function enterFullscreen() {
+        var elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+    }
+
     function showSlide(index) {
         slides.forEach(function(slide, i) {
             slide.classList.toggle('active', i === index);
@@ -97,9 +109,11 @@
         resetSlides();
     }
 
+    // Try enter fullscreen on first interaction
     document.addEventListener('touchstart', function(e) {
         touchStartY = e.touches[0].clientY;
         initAudio();
+        enterFullscreen();
     }, {passive: true});
 
     document.addEventListener('touchend', function(e) {

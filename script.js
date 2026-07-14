@@ -1,226 +1,179 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
+(function() {
+    var slides = document.querySelectorAll('.slide');
+    var audio = document.getElementById('audio');
+    var playBtn = document.getElementById('playBtn');
+    var replayBtn = document.getElementById('replayBtn');
+    var progressContainer = document.getElementById('progressContainer');
+    var progressFill = document.getElementById('progressFill');
+    var currentTimeEl = document.getElementById('currentTime');
+    var durationEl = document.getElementById('duration');
+    var container = document.querySelector('.slides-container');
 
-html, body {
-    height: 100%;
-    height: -webkit-fill-available;
-    overflow: hidden;
-    background: #000;
-    color: #f5f0e8;
-    font-family: 'Caveat', cursive;
-    font-weight: 400;
-    -webkit-font-smoothing: antialiased;
-}
+    var currentSlide = 0;
+    var isPlaying = false;
+    var touchStartY = 0;
+    var touchStartX = 0;
+    var audioReady = false;
+    var isAnimating = false;
 
-/* Fullscreen on iOS Safari */
-body {
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-}
+    function showSlide(index) {
+        if (index < 0 || index >= slides.length) return;
+        slides.forEach(function(slide, i) {
+            slide.classList.toggle('active', i === index);
+        });
+        currentSlide = index;
+    }
 
-.slides-container {
-    height: 100%;
-    height: -webkit-fill-available;
-    position: relative;
-}
+    function nextSlide() {
+        if (currentSlide < slides.length - 1 && !isAnimating) {
+            isAnimating = true;
+            showSlide(currentSlide + 1);
+            setTimeout(function() { isAnimating = false; }, 800);
+        }
+    }
 
-.slide {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    height: -webkit-fill-available;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 30px;
-    padding-top: max(60px, env(safe-area-inset-top));
-    padding-bottom: max(60px, env(safe-area-inset-bottom));
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.8s ease;
-    z-index: 1;
-}
+    function prevSlide() {
+        if (currentSlide > 0 && !isAnimating) {
+            isAnimating = true;
+            showSlide(currentSlide - 1);
+            setTimeout(function() { isAnimating = false; }, 800);
+        }
+    }
 
-.slide.active {
-    opacity: 1;
-    pointer-events: auto;
-    z-index: 2;
-}
+    function resetSlides() {
+        showSlide(0);
+    }
 
-.content {
-    text-align: center;
-    max-width: 360px;
-}
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return '0:00';
+        var mins = Math.floor(seconds / 60);
+        var secs = Math.floor(seconds % 60);
+        return mins + ':' + (secs < 10 ? '0' : '') + secs;
+    }
 
-.text {
-    font-size: clamp(1.8rem, 6vw, 2.4rem);
-    line-height: 1.5;
-    margin: 6px 0;
-    opacity: 0;
-    transform: translateY(15px);
-    transition: all 0.6s ease;
-}
+    function updateProgress() {
+        if (audio.duration) {
+            var percent = (audio.currentTime / audio.duration) * 100;
+            progressFill.style.width = percent + '%';
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+            durationEl.textContent = formatTime(audio.duration);
+        }
+    }
 
-.dots {
-    font-size: clamp(3rem, 10vw, 5rem);
-    color: rgba(255, 255, 255, 0.3);
-    letter-spacing: 0.3em;
-    opacity: 0;
-    transition: opacity 0.8s ease;
-}
+    function initAudio() {
+        if (!audioReady) {
+            audio.load();
+            audioReady = true;
+        }
+    }
 
-.slide.active .dots {
-    opacity: 1;
-}
+    function playAudio() {
+        var playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(function() {
+                isPlaying = true;
+                playBtn.querySelector('.btn-text').textContent = 'Пауза';
+                playBtn.classList.add('playing');
+                progressContainer.classList.add('visible');
+            }).catch(function(err) {
+                console.log('Play failed:', err);
+            });
+        }
+    }
 
-.slide.active .text {
-    opacity: 1;
-    transform: translateY(0);
-}
+    function pauseAudio() {
+        audio.pause();
+        isPlaying = false;
+        playBtn.querySelector('.btn-text').textContent = 'Продолжить';
+        playBtn.classList.remove('playing');
+    }
 
-.slide.active .text:nth-child(1) { transition-delay: 0.1s; }
-.slide.active .text:nth-child(2) { transition-delay: 0.25s; }
-.slide.active .text:nth-child(3) { transition-delay: 0.4s; }
-.slide.active .text:nth-child(4) { transition-delay: 0.55s; }
-.slide.active .text:nth-child(5) { transition-delay: 0.7s; }
+    function handlePlayClick(e) {
+        e.stopPropagation();
+        initAudio();
+        if (audio.paused) {
+            playAudio();
+        } else {
+            pauseAudio();
+        }
+    }
 
-.number {
-    font-size: clamp(7rem, 22vw, 10rem);
-    font-weight: 400;
-    line-height: 1;
-    margin: 20px 0;
-    color: #d4af37;
-    opacity: 0;
-    transform: translateY(15px);
-    transition: all 0.8s ease 0.2s;
-}
+    function handleReplayClick(e) {
+        e.stopPropagation();
+        resetSlides();
+    }
 
-.slide.active .number {
-    opacity: 1;
-    transform: translateY(0);
-}
+    // Swipe on container
+    container.addEventListener('touchstart', function(e) {
+        touchStartY = e.touches[0].clientY;
+        touchStartX = e.touches[0].clientX;
+        initAudio();
+    }, {passive: true});
 
-.highlight {
-    color: #d4af37;
-    font-style: italic;
-}
+    container.addEventListener('touchend', function(e) {
+        var touchEndY = e.changedTouches[0].clientY;
+        var touchEndX = e.changedTouches[0].clientX;
+        var diffY = touchStartY - touchEndY;
+        var diffX = touchStartX - touchEndX;
+        
+        if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 50) {
+            e.preventDefault();
+            if (diffY > 0) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        }
+    }, {passive: false});
 
-.final {
-    color: #d4af37;
-    font-weight: 500;
-}
+    // Wheel
+    var wheelTimeout;
+    container.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        clearTimeout(wheelTimeout);
+        wheelTimeout = setTimeout(function() {
+            if (e.deltaY > 0) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        }, 100);
+    }, {passive: false});
 
-/* Buttons */
-.btn-play {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #f5f0e8;
-    padding: 20px 44px;
-    font-size: 1.6rem;
-    font-family: 'Caveat', cursive;
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: 100px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    -webkit-appearance: none;
-    opacity: 0;
-    transform: translateY(15px);
-    transition: all 0.6s ease 0.3s;
-}
+    // Keyboard
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            nextSlide();
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevSlide();
+        }
+    });
 
-.slide.active .btn-play {
-    opacity: 1;
-    transform: translateY(0);
-}
+    // Audio events
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('ended', function() {
+        isPlaying = false;
+        playBtn.querySelector('.btn-text').textContent = 'Послушать';
+        playBtn.classList.remove('playing');
+    });
+    audio.addEventListener('loadedmetadata', function() {
+        durationEl.textContent = formatTime(audio.duration);
+    });
 
-.btn-play:active {
-    background: rgba(255, 255, 255, 0.12);
-    transform: scale(0.97);
-}
+    // Button events
+    playBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        handlePlayClick(e);
+    });
 
-.btn-play.playing {
-    background: rgba(212, 175, 55, 0.12);
-    border-color: rgba(212, 175, 55, 0.3);
-}
+    replayBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        handleReplayClick(e);
+    });
 
-.btn-icon {
-    font-size: 0.8rem;
-    opacity: 0.6;
-}
+    // Start
+    showSlide(0);
 
-.btn-replay {
-    background: transparent;
-    border: 1px solid rgba(212, 175, 55, 0.4);
-    color: #d4af37;
-    padding: 14px 32px;
-    font-size: 1.4rem;
-    font-family: 'Caveat', cursive;
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: 100px;
-    transition: all 0.3s ease;
-    -webkit-appearance: none;
-    margin-top: 30px;
-    opacity: 0;
-    transform: translateY(15px);
-    transition: all 0.6s ease;
-}
-
-.slide.active .btn-replay {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 0.8s;
-}
-
-.btn-replay:active {
-    background: rgba(212, 175, 55, 0.1);
-    transform: scale(0.97);
-}
-
-/* Progress */
-.progress-container {
-    margin-top: 25px;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-}
-
-.progress-container.visible {
-    opacity: 1;
-}
-
-.progress-bar {
-    width: 220px;
-    height: 2px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 1px;
-    margin: 0 auto;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: rgba(255, 255, 255, 0.4);
-    width: 0%;
-    transition: width 0.3s linear;
-}
-
-.time {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    font-size: 1rem;
-    color: rgba(255, 255, 255, 0.3);
-}
+})();

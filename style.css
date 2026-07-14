@@ -14,20 +14,15 @@ html, body {
     font-family: 'Caveat', cursive;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
-}
-
-/* Fullscreen on iOS Safari */
-body {
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
+    touch-action: none;
+    -webkit-touch-callout: none;
 }
 
 .slides-container {
     height: 100%;
     height: -webkit-fill-available;
     position: relative;
+    touch-action: none;
 }
 
 .slide {
@@ -47,6 +42,7 @@ body {
     pointer-events: none;
     transition: opacity 0.8s ease;
     z-index: 1;
+    touch-action: none;
 }
 
 .slide.active {
@@ -58,6 +54,11 @@ body {
 .content {
     text-align: center;
     max-width: 360px;
+    pointer-events: none;
+}
+
+.slide.active .content {
+    pointer-events: auto;
 }
 
 .text {
@@ -70,11 +71,12 @@ body {
 }
 
 .dots {
-    font-size: clamp(3rem, 10vw, 5rem);
-    color: rgba(255, 255, 255, 0.3);
-    letter-spacing: 0.3em;
+    font-size: clamp(4rem, 15vw, 8rem);
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.2em;
+    line-height: 1;
     opacity: 0;
-    transition: opacity 0.8s ease;
+    transition: opacity 0.6s ease;
 }
 
 .slide.active .dots {
@@ -118,7 +120,6 @@ body {
     font-weight: 500;
 }
 
-/* Buttons */
 .btn-play {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -139,6 +140,7 @@ body {
     opacity: 0;
     transform: translateY(15px);
     transition: all 0.6s ease 0.3s;
+    pointer-events: auto;
 }
 
 .slide.active .btn-play {
@@ -177,6 +179,7 @@ body {
     opacity: 0;
     transform: translateY(15px);
     transition: all 0.6s ease;
+    pointer-events: auto;
 }
 
 .slide.active .btn-replay {
@@ -190,7 +193,6 @@ body {
     transform: scale(0.97);
 }
 
-/* Progress */
 .progress-container {
     margin-top: 25px;
     opacity: 0;
